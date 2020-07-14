@@ -6,7 +6,7 @@ DataGenerator.py split 96 users into 3 groups and generate phase 1 training data
 
 SiameseNet.py defines different network structures 
 
-Phase 1 training is to train a Siamese net to distingushi data from different users. It helps the model to converage when doing MIL.
+Phase 1 training is to train a Siamese net to distinguish data from different users. It helps the model to converage when doing MIL.
 
 MIL1 is about using MIL-Siamese model to detect non-pure data
 
