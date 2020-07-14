@@ -122,3 +122,87 @@ class SiameseNetwork(nn.Module):
         # print(dist.size())
         f = self.fc2(dist)
         return f
+
+class SiameseNetwork10s(nn.Module):
+    def __init__(self):
+        super(SiameseNetwork10s, self).__init__()
+
+        self.cnn1 = nn.Sequential(nn.Conv2d(1, 256, (3, 5), stride=(1, 3)),
+                                  nn.LeakyReLU(inplace=True),
+                                  nn.BatchNorm2d(256),
+                                  nn.MaxPool2d((1, 2), stride=(1, 2)))
+        self.cnn2 = nn.Sequential(nn.Conv1d(256, 128, 8, stride=4),
+                                  nn.LeakyReLU(inplace=True),
+                                  nn.BatchNorm1d(128),
+                                  nn.MaxPool1d(4, stride=2))
+        self.fc1 = nn.Sequential(nn.Linear(2432, 1024),
+                                 nn.Dropout(0.3),
+                                 nn.LeakyReLU(inplace=True),
+                                 nn.Linear(1024, 512),
+                                 nn.Dropout(0.3),
+                                 nn.LeakyReLU(inplace=True),
+                                 nn.Linear(512, 128),
+                                 nn.Dropout(0.3)
+                                 )
+        self.fc2 = nn.Sequential(nn.Linear(1, 1),
+                                 nn.Sigmoid())
+
+    def forward_once(self, x):
+        output = self.cnn1(x)
+        output = output.squeeze(2)
+        output = self.cnn2(output)
+        output = output.view(output.size(0), -1)
+        y = self.fc1(output)
+        return y
+
+    def forward(self, x1, x2):
+        y1 = self.forward_once(x1)
+        y2 = self.forward_once(x2)
+        dist = L1_distance(y1, y2)
+        if(torch.cuda.is_available()):
+            dist = dist.cuda()
+        # print(dist.size())
+        f = self.fc2(dist)
+        return f
+
+class SiameseNetwork4s(nn.Module):
+    def __init__(self):
+        super(SiameseNetwork4s, self).__init__()
+
+        self.cnn1 = nn.Sequential(nn.Conv2d(1, 256, (3, 5), stride=(1, 3)),
+                                  nn.LeakyReLU(inplace=True),
+                                  nn.BatchNorm2d(256),
+                                  nn.MaxPool2d((1, 2), stride=(1, 2)))
+        self.cnn2 = nn.Sequential(nn.Conv1d(256, 128, 8, stride=4),
+                                  nn.LeakyReLU(inplace=True),
+                                  nn.BatchNorm1d(128),
+                                  nn.MaxPool1d(4, stride=2))
+        self.fc1 = nn.Sequential(nn.Linear(768, 512),
+                                 nn.Dropout(0.3),
+                                 nn.LeakyReLU(inplace=True),
+                                 nn.Linear(512, 256),
+                                 nn.Dropout(0.3),
+                                 nn.LeakyReLU(inplace=True),
+                                 nn.Linear(256, 128),
+                                 nn.Dropout(0.3)
+                                 )
+        self.fc2 = nn.Sequential(nn.Linear(1, 1),
+                                 nn.Sigmoid())
+
+    def forward_once(self, x):
+        output = self.cnn1(x)
+        output = output.squeeze(2)
+        output = self.cnn2(output)
+        output = output.view(output.size(0), -1)
+        y = self.fc1(output)
+        return y
+
+    def forward(self, x1, x2):
+        y1 = self.forward_once(x1)
+        y2 = self.forward_once(x2)
+        dist = L1_distance(y1, y2)
+        if(torch.cuda.is_available()):
+            dist = dist.cuda()
+        # print(dist.size())
+        f = self.fc2(dist)
+        return f
